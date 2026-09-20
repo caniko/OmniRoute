@@ -130,6 +130,25 @@ test("pollToken maps unknown errors to a fixed response", async () => {
   assert.ok(!("error_description" in result.data));
 });
 
+test("pollToken rejects inherited properties as error codes", async () => {
+  for (const code of ["constructor", "toString", "hasOwnProperty", "__proto__"]) {
+    useFetch(async () => jsonResponse({ error: code, error_description: "x" }));
+    const result = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-code-1");
+    assert.equal(result.data.error, "invalid_response", code);
+    assert.ok(!("error_description" in result.data), code);
+  }
+});
+
+test("pollToken replaces known-code descriptions with fixed messages", async () => {
+  useFetch(async () =>
+    jsonResponse({ error: "access_denied", error_description: "user=alice api_key=abc123" })
+  );
+  const result = await museCode.pollToken(MUSE_CODE_CONFIG, "dev-code-1");
+  assert.equal(result.data.error, "access_denied");
+  assert.equal(result.data.error_description, "Authorization denied.");
+  assert.ok(!String(result.data.error_description).includes("abc123"));
+});
+
 test("pollToken maps transport failure to network_error", async () => {
   useFetch(async () => {
     throw new Error("boom");

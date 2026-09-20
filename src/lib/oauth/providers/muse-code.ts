@@ -131,28 +131,24 @@ export const museCode = {
       }
       return { ok: response.ok, data };
     }
-    // Only recognized OAuth error codes pass through with their description;
-    // anything else becomes a fixed error so malformed or hostile payloads
-    // cannot inject arbitrary text (or credential-like strings) into UI
-    // error paths.
-    const KNOWN_POLL_ERRORS = new Set([
-      "authorization_pending",
-      "slow_down",
-      "access_denied",
-      "expired_token",
-      "invalid_grant",
-    ]);
+    // Only recognized OAuth error codes pass through, each mapped to a fixed
+    // message. Upstream descriptions are always discarded: they are free text
+    // and must never reach UI error paths, where they could carry sensitive
+    // or credential-like strings.
+    const POLL_ERROR_MESSAGES: Record<string, string> = {
+      authorization_pending: "Authorization pending.",
+      slow_down: "Authorization pending.",
+      access_denied: "Authorization denied.",
+      expired_token: "Device code expired.",
+      invalid_grant: "Authorization failed.",
+    };
     const error =
-      typeof parsed.error === "string" && KNOWN_POLL_ERRORS.has(parsed.error)
+      typeof parsed.error === "string" && Object.hasOwn(POLL_ERROR_MESSAGES, parsed.error)
         ? parsed.error
         : "invalid_response";
     const data: Record<string, unknown> = { error };
-    if (
-      error !== "invalid_response" &&
-      typeof parsed.error_description === "string" &&
-      parsed.error_description.trim()
-    ) {
-      data.error_description = parsed.error_description;
+    if (error !== "invalid_response") {
+      data.error_description = POLL_ERROR_MESSAGES[error];
     }
     return { ok: response.ok, data };
   },

@@ -30,24 +30,14 @@ export const muse_codeProvider: RegistryEntry = buildOpenAiCompatibleRegistryEnt
     // the wire format (instead of relying on per-request apiFormat) keeps
     // Chat Completions callers translated to Responses. Live discovery
     // remains authoritative: ids a key is not entitled to are rejected, so
-    // these entries never route traffic a credential cannot serve. Windows
-    // mirror the opencode-family Spark entries (1.2/1.3) and the documented
-    // subscription fallback (1.1).
+    // these entries never route traffic a credential cannot serve. The model
+    // set and fallback windows mirror the verified subscription contract
+    // (five known ids; live limits win, 1048576/131072 fallback).
     {
       id: "muse-spark-1.1",
       name: "Muse Spark 1.1",
-      contextLength: 128000,
-      maxOutputTokens: 64000,
-      supportsReasoning: true,
-      supportsXHighEffort: true,
-      toolCalling: true,
-      targetFormat: "openai-responses",
-    },
-    {
-      id: "muse-spark-1.1-contributor",
-      name: "Muse Spark 1.1 Contributor",
-      contextLength: 128000,
-      maxOutputTokens: 64000,
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
       supportsReasoning: true,
       supportsXHighEffort: true,
       toolCalling: true,

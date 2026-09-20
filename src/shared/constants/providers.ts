@@ -340,8 +340,15 @@ function getOrCreateAiProviders(): Record<string, any> {
     ensureProvidersValidated();
     _aiProviders = {};
     for (const section of _PROVIDER_SECTIONS) {
+      // Skip the OAuth section here: it is applied last so OAuth entries win
+      // on id overlap, matching getProviderById(), getProviderByAlias(), and
+      // the static catalog resolution order. Today the only overlap is
+      // "muse-code" (subscription OAuth + META_API_KEY), whose
+      // connection/auth metadata must be the subscription variant everywhere.
+      if (section === OAUTH_PROVIDERS) continue;
       Object.assign(_aiProviders, section);
     }
+    Object.assign(_aiProviders, OAUTH_PROVIDERS);
   }
   return _aiProviders;
 }
